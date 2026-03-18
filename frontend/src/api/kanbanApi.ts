@@ -9,10 +9,20 @@ function authHeaders(): Record<string, string> {
   return headers;
 }
 
+function handleResponse(res: Response) {
+  if (res.status === 401 || res.status === 403) {
+    localStorage.removeItem('token');
+    localStorage.removeItem('username');
+    window.location.reload();
+    throw new Error('Session expirée, veuillez vous reconnecter.');
+  }
+  if (!res.ok) throw new Error(`Erreur ${res.status}`);
+}
+
 export const kanbanApi = {
   async getColumns(): Promise<Column[]> {
     const res = await fetch(`${BASE}/columns`, { headers: authHeaders() });
-    if (!res.ok) throw new Error('Erreur serveur');
+    handleResponse(res);
     return res.json();
   },
 
@@ -22,7 +32,7 @@ export const kanbanApi = {
       headers: authHeaders(),
       body: JSON.stringify({ name, color }),
     });
-    if (!res.ok) throw new Error('Erreur création colonne');
+    handleResponse(res);
     return res.json();
   },
 
@@ -32,13 +42,13 @@ export const kanbanApi = {
       headers: authHeaders(),
       body: JSON.stringify({ name, color }),
     });
-    if (!res.ok) throw new Error('Erreur mise à jour colonne');
+    handleResponse(res);
     return res.json();
   },
 
   async deleteColumn(id: number): Promise<void> {
     const res = await fetch(`${BASE}/columns/${id}`, { method: 'DELETE', headers: authHeaders() });
-    if (!res.ok) throw new Error('Erreur suppression colonne');
+    handleResponse(res);
   },
 
   async createCard(columnId: number, data: Partial<Card>): Promise<Card> {
@@ -47,7 +57,7 @@ export const kanbanApi = {
       headers: authHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur création carte');
+    handleResponse(res);
     return res.json();
   },
 
@@ -57,7 +67,7 @@ export const kanbanApi = {
       headers: authHeaders(),
       body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error('Erreur mise à jour carte');
+    handleResponse(res);
     return res.json();
   },
 
@@ -67,12 +77,12 @@ export const kanbanApi = {
       headers: authHeaders(),
       body: JSON.stringify({ targetColumnId, position }),
     });
-    if (!res.ok) throw new Error('Erreur déplacement carte');
+    handleResponse(res);
     return res.json();
   },
 
   async deleteCard(id: number): Promise<void> {
     const res = await fetch(`${BASE}/cards/${id}`, { method: 'DELETE', headers: authHeaders() });
-    if (!res.ok) throw new Error('Erreur suppression carte');
+    handleResponse(res);
   },
 };
