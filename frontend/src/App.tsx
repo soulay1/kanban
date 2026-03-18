@@ -10,12 +10,15 @@ import { KanbanColumn } from './components/KanbanColumn';
 import { KanbanCard } from './components/KanbanCard';
 import { CardModal } from './components/CardModal';
 import { ColumnModal } from './components/ColumnModal';
+import { AuthPage } from './pages/AuthPage';
+import { useAuth } from './context/AuthContext';
 import './App.css';
 
 type CardModalState = { columnId: number; card?: Card } | null;
 type ColumnModalState = { column?: Column } | null;
 
 function App() {
+  const { token, username, logout } = useAuth();
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +41,9 @@ function App() {
     }
   }, []);
 
-  useEffect(() => { loadColumns(); }, [loadColumns]);
+  useEffect(() => { if (token) loadColumns(); }, [loadColumns, token]);
+
+  if (!token) return <AuthPage />;
 
   const handleDragStart = (event: DragStartEvent) => {
     const { data } = event.active;
@@ -197,9 +202,16 @@ function App() {
             <p>{columns.length} colonnes · {columns.reduce((acc, c) => acc + c.cards.length, 0)} cartes</p>
           </div>
         </div>
-        <button className="btn btn--primary" onClick={() => setColumnModal({})}>
-          + Nouvelle colonne
-        </button>
+        <div className="app__header-right">
+          <button className="btn btn--primary" onClick={() => setColumnModal({})}>
+            + Nouvelle colonne
+          </button>
+          <div className="app__user">
+            <span className="app__user-avatar">{username?.[0]?.toUpperCase()}</span>
+            <span className="app__username">{username}</span>
+            <button className="app__logout" onClick={logout} title="Se déconnecter">↩</button>
+          </div>
+        </div>
       </header>
 
       <main className="app__main">

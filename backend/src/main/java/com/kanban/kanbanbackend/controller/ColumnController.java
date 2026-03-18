@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,29 +24,29 @@ public class ColumnController {
     }
 
     @GetMapping
-    @Operation(summary = "Récupérer toutes les colonnes avec leurs cartes")
-    public ResponseEntity<List<Column>> getAllColumns() {
-        return ResponseEntity.ok(columnService.getAllColumns());
+    @Operation(summary = "Récupérer toutes les colonnes de l'utilisateur connecté")
+    public ResponseEntity<List<Column>> getAllColumns(Authentication auth) {
+        return ResponseEntity.ok(columnService.getAllColumns(auth.getName()));
     }
 
     @PostMapping
     @Operation(summary = "Créer une nouvelle colonne")
-    public ResponseEntity<Column> createColumn(@RequestBody Column column) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(columnService.createColumn(column));
+    public ResponseEntity<Column> createColumn(@RequestBody Column column, Authentication auth) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(columnService.createColumn(column, auth.getName()));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Modifier une colonne")
-    public ResponseEntity<Column> updateColumn(@PathVariable Long id, @RequestBody Column column) {
-        return columnService.updateColumn(id, column)
+    public ResponseEntity<Column> updateColumn(@PathVariable Long id, @RequestBody Column column, Authentication auth) {
+        return columnService.updateColumn(id, column, auth.getName())
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Supprimer une colonne et toutes ses cartes")
-    public ResponseEntity<Void> deleteColumn(@PathVariable Long id) {
-        if (columnService.deleteColumn(id)) {
+    public ResponseEntity<Void> deleteColumn(@PathVariable Long id, Authentication auth) {
+        if (columnService.deleteColumn(id, auth.getName())) {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();

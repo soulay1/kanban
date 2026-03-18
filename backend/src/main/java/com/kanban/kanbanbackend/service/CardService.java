@@ -20,8 +20,8 @@ public class CardService {
         this.columnRepository = columnRepository;
     }
 
-    public Optional<Card> createCard(Long columnId, Card card) {
-        return columnRepository.findById(columnId).map(column -> {
+    public Optional<Card> createCard(Long columnId, Card card, String username) {
+        return columnRepository.findByIdAndUserUsername(columnId, username).map(column -> {
             int count = cardRepository.countByColumnId(columnId);
             card.setColumn(column);
             card.setPosition(count);
@@ -29,31 +29,34 @@ public class CardService {
         });
     }
 
-    public Optional<Card> updateCard(Long id, Card updated) {
-        return cardRepository.findById(id).map(card -> {
-            card.setTitle(updated.getTitle());
-            card.setDescription(updated.getDescription());
-            card.setPriority(updated.getPriority());
-            card.setTag(updated.getTag());
-            return cardRepository.save(card);
-        });
+    public Optional<Card> updateCard(Long id, Card updated, String username) {
+        return cardRepository.findById(id)
+                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .map(card -> {
+                    card.setTitle(updated.getTitle());
+                    card.setDescription(updated.getDescription());
+                    card.setPriority(updated.getPriority());
+                    card.setTag(updated.getTag());
+                    return cardRepository.save(card);
+                });
     }
 
-    public Optional<Card> moveCard(Long id, MoveCardRequest request) {
-        return cardRepository.findById(id).map(card -> {
-            Column targetColumn = columnRepository.findById(request.getTargetColumnId())
-                    .orElseThrow(() -> new RuntimeException("Column not found"));
-            card.setColumn(targetColumn);
-            card.setPosition(request.getPosition());
-            return cardRepository.save(card);
-        });
+    public Optional<Card> moveCard(Long id, MoveCardRequest request, String username) {
+        return cardRepository.findById(id)
+                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .map(card -> {
+                    Column targetColumn = columnRepository.findByIdAndUserUsername(request.getTargetColumnId(), username)
+                            .orElseThrow(() -> new RuntimeException("Colonne introuvable"));
+                    card.setColumn(targetColumn);
+                    card.setPosition(request.getPosition());
+                    return cardRepository.save(card);
+                });
     }
 
-    public boolean deleteCard(Long id) {
-        if (cardRepository.existsById(id)) {
-            cardRepository.deleteById(id);
-            return true;
-        }
-        return false;
+    public boolean deleteCard(Long id, String username) {
+        return cardRepository.findById(id)
+                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .map(card -> { cardRepository.delete(card); return true; })
+                .orElse(false);
     }
 }

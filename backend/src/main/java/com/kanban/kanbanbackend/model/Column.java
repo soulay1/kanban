@@ -1,5 +1,6 @@
 package com.kanban.kanbanbackend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,24 +13,23 @@ public class Column {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @jakarta.validation.constraints.NotBlank
+    @jakarta.persistence.Column(nullable = false)
     private String name;
 
     private String color;
 
     private int position;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
+
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
     private List<Card> cards = new ArrayList<>();
 
     public Column() {}
-
-    public Column(String name, String color, int position) {
-        this.name = name;
-        this.color = color;
-        this.position = position;
-    }
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -42,6 +42,9 @@ public class Column {
 
     public int getPosition() { return position; }
     public void setPosition(int position) { this.position = position; }
+
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     public List<Card> getCards() { return cards; }
     public void setCards(List<Card> cards) { this.cards = cards; }

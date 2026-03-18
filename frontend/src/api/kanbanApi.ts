@@ -2,9 +2,16 @@ import { Card, Column } from '../types/kanban';
 
 const BASE = 'http://localhost:8080/api';
 
+function authHeaders(): Record<string, string> {
+  const token = localStorage.getItem('token');
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  return headers;
+}
+
 export const kanbanApi = {
   async getColumns(): Promise<Column[]> {
-    const res = await fetch(`${BASE}/columns`);
+    const res = await fetch(`${BASE}/columns`, { headers: authHeaders() });
     if (!res.ok) throw new Error('Erreur serveur');
     return res.json();
   },
@@ -12,7 +19,7 @@ export const kanbanApi = {
   async createColumn(name: string, color: string): Promise<Column> {
     const res = await fetch(`${BASE}/columns`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ name, color }),
     });
     if (!res.ok) throw new Error('Erreur création colonne');
@@ -22,7 +29,7 @@ export const kanbanApi = {
   async updateColumn(id: number, name: string, color: string): Promise<Column> {
     const res = await fetch(`${BASE}/columns/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ name, color }),
     });
     if (!res.ok) throw new Error('Erreur mise à jour colonne');
@@ -30,14 +37,14 @@ export const kanbanApi = {
   },
 
   async deleteColumn(id: number): Promise<void> {
-    const res = await fetch(`${BASE}/columns/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE}/columns/${id}`, { method: 'DELETE', headers: authHeaders() });
     if (!res.ok) throw new Error('Erreur suppression colonne');
   },
 
   async createCard(columnId: number, data: Partial<Card>): Promise<Card> {
     const res = await fetch(`${BASE}/cards/column/${columnId}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Erreur création carte');
@@ -47,7 +54,7 @@ export const kanbanApi = {
   async updateCard(id: number, data: Partial<Card>): Promise<Card> {
     const res = await fetch(`${BASE}/cards/${id}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error('Erreur mise à jour carte');
@@ -57,7 +64,7 @@ export const kanbanApi = {
   async moveCard(id: number, targetColumnId: number, position: number): Promise<Card> {
     const res = await fetch(`${BASE}/cards/${id}/move`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders(),
       body: JSON.stringify({ targetColumnId, position }),
     });
     if (!res.ok) throw new Error('Erreur déplacement carte');
@@ -65,7 +72,7 @@ export const kanbanApi = {
   },
 
   async deleteCard(id: number): Promise<void> {
-    const res = await fetch(`${BASE}/cards/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${BASE}/cards/${id}`, { method: 'DELETE', headers: authHeaders() });
     if (!res.ok) throw new Error('Erreur suppression carte');
   },
 };
