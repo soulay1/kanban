@@ -330,6 +330,14 @@ ul { list-style: none; }
 
 .modal__actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; }
 
+.modal__body { padding: 24px; display: flex; flex-direction: column; gap: 20px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+.form-group .input { background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 10px 14px; color: #f1f5f9; font-size: 0.875rem; width: 100%; box-sizing: border-box; transition: border-color 0.15s; }
+.form-group .input:focus { outline: none; border-color: #6366f1; }
+.form-group textarea.input { resize: vertical; min-height: 80px; font-family: inherit; }
+.modal__footer { display: flex; gap: 8px; justify-content: flex-end; padding: 16px 24px; border-top: 1px solid #334155; }
+
 /* ===== BUTTONS ===== */
 .btn--primary {
   background: #6366f1; color: white; padding: 8px 18px;
