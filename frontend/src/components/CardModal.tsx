@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Card, Priority } from '../types/kanban';
+import { kanbanApi } from '../api/kanbanApi';
 
 interface Props {
   card?: Card | null;
@@ -20,6 +21,8 @@ export function CardModal({ card, onSave, onClose }: Props) {
   const [description, setDescription] = useState(card?.description ?? '');
   const [priority, setPriority] = useState<Priority>(card?.priority ?? 'MEDIUM');
   const [tag, setTag] = useState(card?.tag ?? '');
+  const [assignedTo, setAssignedTo] = useState<string>(card?.assignedTo ?? '');
+  const [users, setUsers] = useState<string[]>([]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
@@ -27,10 +30,20 @@ export function CardModal({ card, onSave, onClose }: Props) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
+  useEffect(() => {
+    kanbanApi.getUsers().then(setUsers).catch(() => {});
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
-    onSave({ title: title.trim(), description: description.trim(), priority, tag: tag.trim() });
+    onSave({
+      title: title.trim(),
+      description: description.trim(),
+      priority,
+      tag: tag.trim(),
+      assignedTo: assignedTo || null,
+    });
   };
 
   return (
@@ -82,6 +95,30 @@ export function CardModal({ card, onSave, onClose }: Props) {
                 onChange={(e) => setTag(e.target.value)}
                 placeholder="ex: Frontend, Bug..."
               />
+            </div>
+          </div>
+          <div className="modal__field">
+            <label>Assigner à</label>
+            <div className="assignee-select">
+              <button
+                type="button"
+                className={`assignee-btn ${assignedTo === '' ? 'active' : ''}`}
+                onClick={() => setAssignedTo('')}
+              >
+                <span className="assignee-btn__avatar assignee-btn__avatar--none">–</span>
+                <span>Non assigné</span>
+              </button>
+              {users.map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  className={`assignee-btn ${assignedTo === u ? 'active' : ''}`}
+                  onClick={() => setAssignedTo(u)}
+                >
+                  <span className="assignee-btn__avatar">{u[0].toUpperCase()}</span>
+                  <span>{u}</span>
+                </button>
+              ))}
             </div>
           </div>
           <div className="modal__actions">

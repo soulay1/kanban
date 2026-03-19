@@ -37,6 +37,7 @@ public class CardService {
                     card.setDescription(updated.getDescription());
                     card.setPriority(updated.getPriority());
                     card.setTag(updated.getTag());
+                    card.setAssignedTo(updated.getAssignedTo());
                     return cardRepository.save(card);
                 });
     }

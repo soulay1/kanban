@@ -9,11 +9,22 @@ interface Props {
 }
 
 const PRIORITY_CONFIG = {
-  LOW:    { label: 'Faible',  color: '#22c55e', bg: '#f0fdf4' },
-  MEDIUM: { label: 'Moyen',   color: '#f59e0b', bg: '#fffbeb' },
-  HIGH:   { label: 'Élevé',   color: '#ef4444', bg: '#fef2f2' },
-  URGENT: { label: 'Urgent',  color: '#7c3aed', bg: '#f5f3ff' },
+  LOW:    { label: 'Faible',  color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+  MEDIUM: { label: 'Moyen',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  HIGH:   { label: 'Élevé',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+  URGENT: { label: 'Urgent',  color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
 };
+
+const AVATAR_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#f43f5e',
+  '#f97316', '#eab308', '#22c55e', '#14b8a6', '#3b82f6',
+];
+
+function avatarColor(name: string) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+}
 
 export function KanbanCard({ card, onEdit, onDelete }: Props) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
@@ -50,6 +61,15 @@ export function KanbanCard({ card, onEdit, onDelete }: Props) {
           >
             {p.label}
           </span>
+          {card.assignedTo && (
+            <span
+              className="kanban-card__assignee"
+              style={{ background: avatarColor(card.assignedTo) }}
+              title={card.assignedTo}
+            >
+              {card.assignedTo[0].toUpperCase()}
+            </span>
+          )}
         </div>
       </div>
 

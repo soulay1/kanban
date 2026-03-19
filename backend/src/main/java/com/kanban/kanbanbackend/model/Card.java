@@ -23,6 +23,8 @@ public class Card {
 
     private String tag;
 
+    private String assignedTo;
+
     private int position;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,6 +63,9 @@ public class Card {
 
     public String getTag() { return tag; }
     public void setTag(String tag) { this.tag = tag; }
+
+    public String getAssignedTo() { return assignedTo; }
+    public void setAssignedTo(String assignedTo) { this.assignedTo = assignedTo; }
 
     public int getPosition() { return position; }
     public void setPosition(int position) { this.position = position; }

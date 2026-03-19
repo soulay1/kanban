@@ -15,6 +15,7 @@ export interface Card {
   description: string;
   priority: Priority;
   tag: string;
+  assignedTo: string | null;
   position: number;
   columnId: number;
   createdAt: string;

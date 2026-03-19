@@ -20,6 +20,13 @@ function handleResponse(res: Response) {
 }
 
 export const kanbanApi = {
+  // Users
+  async getUsers(): Promise<string[]> {
+    const res = await fetch(`${BASE}/users`, { headers: authHeaders() });
+    handleResponse(res);
+    return res.json();
+  },
+
   // Boards
   async getBoards(): Promise<Board[]> {
     const res = await fetch(`${BASE}/boards`, { headers: authHeaders() });
