@@ -1,6 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Card } from '../types/kanban';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   card: Card;
@@ -8,11 +9,11 @@ interface Props {
   onDelete: (id: number) => void;
 }
 
-const PRIORITY_CONFIG = {
-  LOW:    { label: 'Faible',  color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
-  MEDIUM: { label: 'Moyen',   color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
-  HIGH:   { label: 'Élevé',   color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
-  URGENT: { label: 'Urgent',  color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
+const PRIORITY_COLORS = {
+  LOW:    { color: '#22c55e', bg: 'rgba(34,197,94,0.12)' },
+  MEDIUM: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)' },
+  HIGH:   { color: '#ef4444', bg: 'rgba(239,68,68,0.12)' },
+  URGENT: { color: '#7c3aed', bg: 'rgba(124,58,237,0.12)' },
 };
 
 const AVATAR_COLORS = [
@@ -27,6 +28,7 @@ function avatarColor(name: string) {
 }
 
 export function KanbanCard({ card, onEdit, onDelete }: Props) {
+  const { tr } = useLanguage();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `card-${card.id}`,
     data: { type: 'card', card },
@@ -38,7 +40,8 @@ export function KanbanCard({ card, onEdit, onDelete }: Props) {
     opacity: isDragging ? 0.4 : 1,
   };
 
-  const p = PRIORITY_CONFIG[card.priority];
+  const pc = PRIORITY_COLORS[card.priority];
+  const label = tr.card.priorities[card.priority];
 
   return (
     <div
@@ -57,9 +60,9 @@ export function KanbanCard({ card, onEdit, onDelete }: Props) {
         <div className="kanban-card__footer">
           <span
             className="kanban-card__priority"
-            style={{ color: p.color, background: p.bg }}
+            style={{ color: pc.color, background: pc.bg }}
           >
-            {p.label}
+            {label}
           </span>
           {card.assignedTo && (
             <span

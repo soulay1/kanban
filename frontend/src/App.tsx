@@ -13,6 +13,8 @@ import { ColumnModal } from './components/ColumnModal';
 import { AuthPage } from './pages/AuthPage';
 import { BoardsPage } from './pages/BoardsPage';
 import { useAuth } from './context/AuthContext';
+import { useLanguage } from './context/LanguageContext';
+import { LangSwitcher } from './components/LangSwitcher';
 import './App.css';
 
 type CardModalState = { columnId: number; card?: Card } | null;
@@ -20,6 +22,8 @@ type ColumnModalState = { column?: Column } | null;
 
 function App() {
   const { token, username, logout } = useAuth();
+  const { tr } = useLanguage();
+  const a = tr.app;
   const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(false);
@@ -38,7 +42,7 @@ function App() {
       setColumns(data);
       setError(null);
     } catch {
-      setError('Impossible de se connecter au serveur.');
+      setError(a.serverError);
     } finally {
       setLoading(false);
     }
@@ -158,7 +162,7 @@ function App() {
       }
       setCardModal(null);
     } catch {
-      setError('Erreur lors de la sauvegarde de la carte.');
+      setError(a.cardSaveError);
     }
   };
 
@@ -169,7 +173,7 @@ function App() {
         cols.map((col) => ({ ...col, cards: col.cards.filter((c) => c.id !== id) }))
       );
     } catch {
-      setError('Erreur lors de la suppression.');
+      setError(a.deleteError);
     }
   };
 
@@ -185,18 +189,18 @@ function App() {
       }
       setColumnModal(null);
     } catch {
-      setError('Erreur lors de la sauvegarde de la colonne.');
+      setError(a.columnSaveError);
     }
   };
 
   const handleDeleteColumn = async (id: number) => {
     if (!selectedBoard) return;
-    if (!confirm('Supprimer cette colonne et toutes ses cartes ?')) return;
+    if (!confirm(a.deleteColumnConfirm)) return;
     try {
       await kanbanApi.deleteColumn(selectedBoard.id, id);
       setColumns((cols) => cols.filter((c) => c.id !== id));
     } catch {
-      setError('Erreur lors de la suppression.');
+      setError(a.deleteError);
     }
   };
 
@@ -209,23 +213,24 @@ function App() {
             <button
               className="breadcrumb-btn"
               onClick={() => { setSelectedBoard(null); setColumns([]); }}
-              title="Retour aux boards"
+              title={a.myBoards}
             >
-              Mes boards
+              {a.myBoards}
             </button>
             <span className="breadcrumb-sep"> / </span>
             <span className="breadcrumb-current">{selectedBoard.name}</span>
           </div>
         </div>
         <div className="app__header-right">
-          <p className="board-stats">{columns.length} colonne{columns.length !== 1 ? 's' : ''} · {columns.reduce((acc, c) => acc + c.cards.length, 0)} carte{columns.reduce((acc, c) => acc + c.cards.length, 0) !== 1 ? 's' : ''}</p>
+          <p className="board-stats">{a.columns(columns.length)} · {a.cards(columns.reduce((acc, c) => acc + c.cards.length, 0))}</p>
+          <LangSwitcher />
           <button className="btn btn--primary" onClick={() => setColumnModal({})}>
-            + Nouvelle colonne
+            {a.newColumn}
           </button>
           <div className="app__user">
             <span className="app__user-avatar">{username?.[0]?.toUpperCase()}</span>
             <span className="app__username">{username}</span>
-            <button className="app__logout" onClick={logout} title="Se déconnecter">↩</button>
+            <button className="app__logout" onClick={logout} title={a.logout}>↩</button>
           </div>
         </div>
       </header>
@@ -234,14 +239,14 @@ function App() {
         {error && (
           <div className="app__error">
             {error}
-            <button className="btn btn--ghost-sm" onClick={loadColumns}>Réessayer</button>
+            <button className="btn btn--ghost-sm" onClick={loadColumns}>{a.retry}</button>
           </div>
         )}
 
         {loading ? (
           <div className="app__loading">
             <div className="spinner" />
-            <span>Chargement du board...</span>
+            <span>{a.loading}</span>
           </div>
         ) : (
           <DndContext
@@ -255,10 +260,10 @@ function App() {
               {columns.length === 0 ? (
                 <div className="board__empty">
                   <div className="board__empty-icon">📋</div>
-                  <h2>Ce board est vide</h2>
-                  <p>Créez votre première colonne pour commencer</p>
+                  <h2>{a.emptyTitle}</h2>
+                  <p>{a.emptyDesc}</p>
                   <button className="btn btn--primary" onClick={() => setColumnModal({})}>
-                    + Créer une colonne
+                    {a.createColumn}
                   </button>
                 </div>
               ) : (

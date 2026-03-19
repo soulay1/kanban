@@ -1,10 +1,14 @@
 import { useState, FormEvent } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { LangSwitcher } from '../components/LangSwitcher';
 
 const BASE = 'http://localhost:8080/api/auth';
 
 export function AuthPage() {
   const { login } = useAuth();
+  const { tr } = useLanguage();
+  const a = tr.auth;
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -24,12 +28,12 @@ export function AuthPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(typeof data === 'string' ? data : 'Une erreur est survenue.');
+        setError(typeof data === 'string' ? data : a.genericError);
         return;
       }
       login(data.token, data.username);
     } catch {
-      setError('Impossible de se connecter au serveur.');
+      setError(a.serverError);
     } finally {
       setLoading(false);
     }
@@ -44,11 +48,14 @@ export function AuthPage() {
 
   return (
     <div className="auth-page">
+      <div className="auth-lang">
+        <LangSwitcher />
+      </div>
       <div className="auth-card">
         <div className="auth-logo">K</div>
-        <h1 className="auth-title">Kanban Board</h1>
+        <h1 className="auth-title">{a.title}</h1>
         <p className="auth-subtitle">
-          {mode === 'login' ? 'Connectez-vous à votre compte' : 'Créez votre compte'}
+          {mode === 'login' ? a.loginSubtitle : a.registerSubtitle}
         </p>
 
         <div className="auth-tabs">
@@ -56,13 +63,13 @@ export function AuthPage() {
             className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
             onClick={() => { setMode('login'); setError(null); }}
           >
-            Connexion
+            {a.loginTab}
           </button>
           <button
             className={`auth-tab ${mode === 'register' ? 'active' : ''}`}
             onClick={() => { setMode('register'); setError(null); }}
           >
-            Inscription
+            {a.registerTab}
           </button>
         </div>
 
@@ -70,19 +77,19 @@ export function AuthPage() {
           {error && <div className="auth-error">{error}</div>}
 
           <div className="auth-field">
-            <label>Nom d'utilisateur</label>
+            <label>{a.username}</label>
             <input
               type="text"
               value={username}
               onChange={e => setUsername(e.target.value)}
-              placeholder="Entrez votre identifiant"
+              placeholder={a.usernamePlaceholder}
               autoFocus
               autoComplete="username"
             />
           </div>
 
           <div className="auth-field">
-            <label>Mot de passe</label>
+            <label>{a.password}</label>
             <input
               type="password"
               value={password}
@@ -97,14 +104,14 @@ export function AuthPage() {
             className="auth-submit"
             disabled={loading || !username.trim() || !password.trim()}
           >
-            {loading ? 'Chargement...' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'}
+            {loading ? a.loading : mode === 'login' ? a.loginBtn : a.registerBtn}
           </button>
         </form>
 
         <p className="auth-switch">
-          {mode === 'login' ? "Pas encore de compte ?" : 'Déjà un compte ?'}
+          {mode === 'login' ? a.noAccount : a.alreadyAccount}
           <button onClick={switchMode}>
-            {mode === 'login' ? ' Inscription' : ' Connexion'}
+            {mode === 'login' ? ` ${a.switchToRegister}` : ` ${a.switchToLogin}`}
           </button>
         </p>
       </div>

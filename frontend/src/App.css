@@ -86,6 +86,13 @@ ul { list-style: none; }
 .app__logout { background: transparent; color: #475569; font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; }
 .app__logout:hover { color: #f87171; }
 
+.lang-switcher { display: flex; gap: 2px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 3px; }
+.lang-btn { background: none; border: none; cursor: pointer; color: #64748b; font-size: 0.75rem; font-weight: 600; padding: 3px 8px; border-radius: 5px; transition: all 0.15s; }
+.lang-btn:hover { color: #94a3b8; }
+.lang-btn.active { background: #334155; color: #f1f5f9; }
+
+.auth-lang { position: absolute; top: 1.5rem; right: 1.5rem; }
+
 .breadcrumb-btn {
   background: none; border: none; cursor: pointer;
   color: #64748b; font-size: 0.875rem; padding: 0;

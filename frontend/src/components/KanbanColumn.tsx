@@ -3,6 +3,7 @@ import { useDroppable } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { Column, Card } from '../types/kanban';
 import { KanbanCard } from './KanbanCard';
+import { useLanguage } from '../context/LanguageContext';
 
 interface Props {
   column: Column;
@@ -15,13 +16,15 @@ interface Props {
 
 export function KanbanColumn({ column, onAddCard, onEditCard, onDeleteCard, onDeleteColumn, onEditColumn }: Props) {
   const [showMenu, setShowMenu] = useState(false);
+  const { tr } = useLanguage();
+  const c = tr.column;
 
   const { setNodeRef, isOver } = useDroppable({
     id: `column-${column.id}`,
     data: { type: 'column', columnId: column.id },
   });
 
-  const cardIds = column.cards.map((c) => `card-${c.id}`);
+  const cardIds = column.cards.map((card) => `card-${card.id}`);
 
   return (
     <div className={`kanban-column ${isOver ? 'kanban-column--over' : ''}`}>
@@ -35,8 +38,8 @@ export function KanbanColumn({ column, onAddCard, onEditCard, onDeleteCard, onDe
           <button className="kanban-column__menu-btn" onClick={() => setShowMenu(!showMenu)}>⋯</button>
           {showMenu && (
             <div className="kanban-column__dropdown">
-              <button onClick={() => { onEditColumn(column); setShowMenu(false); }}>Renommer</button>
-              <button className="danger" onClick={() => { onDeleteColumn(column.id); setShowMenu(false); }}>Supprimer</button>
+              <button onClick={() => { onEditColumn(column); setShowMenu(false); }}>{c.rename}</button>
+              <button className="danger" onClick={() => { onDeleteColumn(column.id); setShowMenu(false); }}>{c.delete}</button>
             </div>
           )}
         </div>
@@ -56,7 +59,7 @@ export function KanbanColumn({ column, onAddCard, onEditCard, onDeleteCard, onDe
       </div>
 
       <button className="kanban-column__add" onClick={() => onAddCard(column.id)}>
-        + Ajouter une carte
+        {c.addCard}
       </button>
     </div>
   );

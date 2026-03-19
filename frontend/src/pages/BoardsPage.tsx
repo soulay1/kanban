@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Board } from '../types/kanban';
 import { kanbanApi } from '../api/kanbanApi';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
+import { LangSwitcher } from '../components/LangSwitcher';
 import './BoardsPage.css';
 
 interface BoardsPageProps {
@@ -10,6 +12,8 @@ interface BoardsPageProps {
 
 export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
   const { username, logout } = useAuth();
+  const { tr } = useLanguage();
+  const b = tr.boards;
   const [boards, setBoards] = useState<Board[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +34,7 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
       setBoards(data);
       setError(null);
     } catch {
-      setError('Impossible de charger les boards.');
+      setError(b.loadError);
     } finally {
       setLoading(false);
     }
@@ -53,12 +57,12 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
 
   async function handleDelete(board: Board, e: React.MouseEvent) {
     e.stopPropagation();
-    if (!confirm(`Supprimer le board "${board.name}" et tout son contenu ?`)) return;
+    if (!confirm(b.deleteConfirm(board.name))) return;
     try {
       await kanbanApi.deleteBoard(board.id);
-      setBoards((prev) => prev.filter((b) => b.id !== board.id));
+      setBoards((prev) => prev.filter((bd) => bd.id !== board.id));
     } catch {
-      setError('Erreur lors de la suppression.');
+      setError(b.deleteError);
     }
   }
 
@@ -69,14 +73,14 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
     try {
       if (editBoard) {
         const updated = await kanbanApi.updateBoard(editBoard.id, formName.trim(), formDesc.trim());
-        setBoards((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+        setBoards((prev) => prev.map((bd) => (bd.id === updated.id ? updated : bd)));
       } else {
         const created = await kanbanApi.createBoard(formName.trim(), formDesc.trim());
         setBoards((prev) => [created, ...prev]);
       }
       setShowForm(false);
     } catch {
-      setError('Erreur lors de la sauvegarde.');
+      setError(b.saveError);
     } finally {
       setSaving(false);
     }
@@ -91,10 +95,6 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
     return boardColors[id % boardColors.length];
   }
 
-  function formatDate(dateStr: string) {
-    return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' });
-  }
-
   return (
     <div className="boards-page">
       <header className="boards-header">
@@ -102,10 +102,11 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
           <div className="boards-logo">K</div>
           <div>
             <h1>Kanban</h1>
-            <p>Espace de travail</p>
+            <p>{b.workspace}</p>
           </div>
         </div>
         <div className="boards-header__right">
+          <LangSwitcher />
           <div className="app__user">
             <span className="app__user-avatar">{username?.[0]?.toUpperCase()}</span>
             <span className="app__username">{username}</span>
@@ -117,30 +118,30 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
       <main className="boards-main">
         <div className="boards-section">
           <div className="boards-section__header">
-            <h2>Mes boards</h2>
+            <h2>{b.myBoards}</h2>
             <button className="btn btn--primary" onClick={openCreate}>
-              + Nouveau board
+              {b.newBoard}
             </button>
           </div>
 
           {error && (
             <div className="app__error">
               {error}
-              <button className="btn btn--ghost-sm" onClick={loadBoards}>Réessayer</button>
+              <button className="btn btn--ghost-sm" onClick={loadBoards}>{b.retry}</button>
             </div>
           )}
 
           {loading ? (
             <div className="app__loading">
               <div className="spinner" />
-              <span>Chargement...</span>
+              <span>{b.loading}</span>
             </div>
           ) : boards.length === 0 ? (
             <div className="boards-empty">
               <div className="boards-empty__icon">📋</div>
-              <h3>Aucun board pour l'instant</h3>
-              <p>Créez votre premier board pour organiser vos tâches</p>
-              <button className="btn btn--primary" onClick={openCreate}>+ Créer un board</button>
+              <h3>{b.emptyTitle}</h3>
+              <p>{b.emptyDesc}</p>
+              <button className="btn btn--primary" onClick={openCreate}>{b.createFirst}</button>
             </div>
           ) : (
             <div className="boards-grid">
@@ -158,12 +159,14 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
                       <p className="board-card__desc">{board.description}</p>
                     )}
                     <div className="board-card__meta">
-                      <span>{board.columnCount} colonne{board.columnCount !== 1 ? 's' : ''}</span>
+                      <span>{b.columns(board.columnCount)}</span>
                       <span>·</span>
-                      <span>{board.cardCount} carte{board.cardCount !== 1 ? 's' : ''}</span>
+                      <span>{b.cards(board.cardCount)}</span>
                     </div>
                     {board.createdAt && (
-                      <div className="board-card__date">Créé le {formatDate(board.createdAt)}</div>
+                      <div className="board-card__date">
+                        {b.createdAt} {new Date(board.createdAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      </div>
                     )}
                   </div>
                   <div className="board-card__actions">
@@ -189,37 +192,37 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal__header">
-              <h2>{editBoard ? 'Modifier le board' : 'Nouveau board'}</h2>
+              <h2>{editBoard ? b.editTitle : b.newTitle}</h2>
               <button className="modal__close" onClick={() => setShowForm(false)}>✕</button>
             </div>
             <form onSubmit={handleSave} className="modal__body">
               <div className="form-group">
-                <label>Nom du board *</label>
+                <label>{b.boardName}</label>
                 <input
                   className="input"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Ex: Projet Alpha, Sprint Q1..."
+                  placeholder={b.boardNamePlaceholder}
                   autoFocus
                   required
                 />
               </div>
               <div className="form-group">
-                <label>Description</label>
+                <label>{b.description}</label>
                 <textarea
                   className="input"
                   value={formDesc}
                   onChange={(e) => setFormDesc(e.target.value)}
-                  placeholder="Description optionnelle..."
+                  placeholder={b.descriptionPlaceholder}
                   rows={3}
                 />
               </div>
               <div className="modal__footer">
                 <button type="button" className="btn btn--ghost" onClick={() => setShowForm(false)}>
-                  Annuler
+                  {b.cancel}
                 </button>
                 <button type="submit" className="btn btn--primary" disabled={saving}>
-                  {saving ? 'Enregistrement...' : editBoard ? 'Modifier' : 'Créer'}
+                  {saving ? b.saving : editBoard ? b.save : b.create}
                 </button>
               </div>
             </form>
