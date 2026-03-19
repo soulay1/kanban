@@ -15,6 +15,7 @@ import { BoardsPage } from './pages/BoardsPage';
 import { useAuth } from './context/AuthContext';
 import { useLanguage } from './context/LanguageContext';
 import { LangSwitcher } from './components/LangSwitcher';
+import { ProfileModal } from './components/ProfileModal';
 import './App.css';
 
 type CardModalState = { columnId: number; card?: Card } | null;
@@ -31,6 +32,7 @@ function App() {
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [cardModal, setCardModal] = useState<CardModalState>(null);
   const [columnModal, setColumnModal] = useState<ColumnModalState>(null);
+  const [showProfile, setShowProfile] = useState(false);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
@@ -228,7 +230,7 @@ function App() {
             {a.newColumn}
           </button>
           <div className="app__user">
-            <span className="app__user-avatar">{username?.[0]?.toUpperCase()}</span>
+            <span className="app__user-avatar" onClick={() => setShowProfile(true)} title={a.profile}>{username?.[0]?.toUpperCase()}</span>
             <span className="app__username">{username}</span>
             <button className="app__logout" onClick={logout} title={a.logout}>↩</button>
           </div>
@@ -310,6 +312,8 @@ function App() {
           onClose={() => setColumnModal(null)}
         />
       )}
+
+      {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
     </div>
   );
 }

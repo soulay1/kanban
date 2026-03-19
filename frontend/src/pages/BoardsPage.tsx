@@ -4,6 +4,7 @@ import { kanbanApi } from '../api/kanbanApi';
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LangSwitcher } from '../components/LangSwitcher';
+import { ProfileModal } from '../components/ProfileModal';
 import './BoardsPage.css';
 
 interface BoardsPageProps {
@@ -22,6 +23,7 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
   const [formName, setFormName] = useState('');
   const [formDesc, setFormDesc] = useState('');
   const [saving, setSaving] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     loadBoards();
@@ -108,9 +110,9 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
         <div className="boards-header__right">
           <LangSwitcher />
           <div className="app__user">
-            <span className="app__user-avatar">{username?.[0]?.toUpperCase()}</span>
+            <span className="app__user-avatar" onClick={() => setShowProfile(true)} title={tr.app.profile}>{username?.[0]?.toUpperCase()}</span>
             <span className="app__username">{username}</span>
-            <button className="app__logout" onClick={logout} title="Se déconnecter">↩</button>
+            <button className="app__logout" onClick={logout} title={tr.app.logout}>↩</button>
           </div>
         </div>
       </header>
@@ -187,6 +189,8 @@ export function BoardsPage({ onSelectBoard }: BoardsPageProps) {
           )}
         </div>
       </main>
+
+      {showProfile && <ProfileModal onClose={() => setShowProfile(false)} />}
 
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>

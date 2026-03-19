@@ -67,6 +67,7 @@ export const t = {
       columnSaveError: 'Erreur lors de la sauvegarde de la colonne.',
       deleteColumnConfirm: 'Supprimer cette colonne et toutes ses cartes ?',
       logout: 'Se déconnecter',
+      profile: 'Modifier mon profil',
     },
     // Column
     column: {
@@ -106,6 +107,23 @@ export const t = {
     // Card
     card: {
       priorities: { LOW: 'Faible', MEDIUM: 'Moyen', HIGH: 'Élevé', URGENT: 'Urgent' },
+    },
+    // Profile
+    profile: {
+      title: 'Mon profil',
+      currentPassword: 'Mot de passe actuel *',
+      currentPasswordPlaceholder: 'Requis pour valider les modifications',
+      newUsername: "Nouveau nom d'utilisateur",
+      newUsernamePlaceholder: 'Laisser vide pour ne pas changer',
+      newPassword: 'Nouveau mot de passe',
+      newPasswordPlaceholder: 'Laisser vide pour ne pas changer',
+      confirmPassword: 'Confirmer le nouveau mot de passe',
+      confirmPasswordPlaceholder: '••••••••',
+      passwordMismatch: 'Les mots de passe ne correspondent pas',
+      cancel: 'Annuler',
+      save: 'Enregistrer',
+      saving: 'Enregistrement...',
+      success: 'Profil mis à jour avec succès',
     },
   },
 
@@ -172,6 +190,7 @@ export const t = {
       columnSaveError: 'Error while saving column.',
       deleteColumnConfirm: 'Delete this column and all its cards?',
       logout: 'Sign out',
+      profile: 'Edit my profile',
     },
     column: {
       rename: 'Rename',
@@ -207,6 +226,22 @@ export const t = {
     },
     card: {
       priorities: { LOW: 'Low', MEDIUM: 'Medium', HIGH: 'High', URGENT: 'Urgent' },
+    },
+    profile: {
+      title: 'My profile',
+      currentPassword: 'Current password *',
+      currentPasswordPlaceholder: 'Required to save changes',
+      newUsername: 'New username',
+      newUsernamePlaceholder: 'Leave blank to keep current',
+      newPassword: 'New password',
+      newPasswordPlaceholder: 'Leave blank to keep current',
+      confirmPassword: 'Confirm new password',
+      confirmPasswordPlaceholder: '••••••••',
+      passwordMismatch: 'Passwords do not match',
+      cancel: 'Cancel',
+      save: 'Save',
+      saving: 'Saving...',
+      success: 'Profile updated successfully',
     },
   },
 } as const;

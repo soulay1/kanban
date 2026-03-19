@@ -20,6 +20,26 @@ function handleResponse(res: Response) {
 }
 
 export const kanbanApi = {
+  // Profile
+  async updateProfile(currentPassword: string, newUsername?: string, newPassword?: string): Promise<{ token: string; username: string }> {
+    const res = await fetch(`${BASE}/users/me`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ currentPassword, newUsername: newUsername || null, newPassword: newPassword || null }),
+    });
+    if (res.status === 401 || res.status === 403) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('username');
+      window.location.reload();
+      throw new Error('Session expirée');
+    }
+    if (!res.ok) {
+      const msg = await res.text();
+      throw new Error(msg || `Erreur ${res.status}`);
+    }
+    return res.json();
+  },
+
   // Users
   async getUsers(): Promise<string[]> {
     const res = await fetch(`${BASE}/users`, { headers: authHeaders() });
