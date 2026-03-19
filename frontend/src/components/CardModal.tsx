@@ -99,27 +99,16 @@ export function CardModal({ card, onSave, onClose }: Props) {
           </div>
           <div className="modal__field">
             <label>Assigner à</label>
-            <div className="assignee-select">
-              <button
-                type="button"
-                className={`assignee-btn ${assignedTo === '' ? 'active' : ''}`}
-                onClick={() => setAssignedTo('')}
-              >
-                <span className="assignee-btn__avatar assignee-btn__avatar--none">–</span>
-                <span>Non assigné</span>
-              </button>
+            <select
+              className="assignee-dropdown"
+              value={assignedTo}
+              onChange={(e) => setAssignedTo(e.target.value)}
+            >
+              <option value="">— Non assigné —</option>
               {users.map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  className={`assignee-btn ${assignedTo === u ? 'active' : ''}`}
-                  onClick={() => setAssignedTo(u)}
-                >
-                  <span className="assignee-btn__avatar">{u[0].toUpperCase()}</span>
-                  <span>{u}</span>
-                </button>
+                <option key={u} value={u}>{u}</option>
               ))}
-            </div>
+            </select>
           </div>
           <div className="modal__actions">
             <button type="button" className="btn btn--ghost" onClick={onClose}>Annuler</button>
