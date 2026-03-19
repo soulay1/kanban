@@ -86,6 +86,16 @@ ul { list-style: none; }
 .app__logout { background: transparent; color: #475569; font-size: 1rem; padding: 2px 4px; border-radius: 4px; transition: color 0.15s; }
 .app__logout:hover { color: #f87171; }
 
+.breadcrumb-btn {
+  background: none; border: none; cursor: pointer;
+  color: #64748b; font-size: 0.875rem; padding: 0;
+  transition: color 0.15s;
+}
+.breadcrumb-btn:hover { color: #94a3b8; }
+.breadcrumb-sep { color: #475569; font-size: 0.875rem; margin: 0 4px; }
+.breadcrumb-current { font-size: 0.875rem; font-weight: 600; color: #f1f5f9; }
+.board-stats { font-size: 0.75rem; color: #64748b; }
+
 .app__main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 
 .app__error {

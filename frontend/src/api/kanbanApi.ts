@@ -1,4 +1,4 @@
-import { Card, Column } from '../types/kanban';
+import { Board, Card, Column } from '../types/kanban';
 
 const BASE = 'http://localhost:8080/api';
 
@@ -20,14 +20,47 @@ function handleResponse(res: Response) {
 }
 
 export const kanbanApi = {
-  async getColumns(): Promise<Column[]> {
-    const res = await fetch(`${BASE}/columns`, { headers: authHeaders() });
+  // Boards
+  async getBoards(): Promise<Board[]> {
+    const res = await fetch(`${BASE}/boards`, { headers: authHeaders() });
     handleResponse(res);
     return res.json();
   },
 
-  async createColumn(name: string, color: string): Promise<Column> {
-    const res = await fetch(`${BASE}/columns`, {
+  async createBoard(name: string, description: string): Promise<Board> {
+    const res = await fetch(`${BASE}/boards`, {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ name, description }),
+    });
+    handleResponse(res);
+    return res.json();
+  },
+
+  async updateBoard(id: number, name: string, description: string): Promise<Board> {
+    const res = await fetch(`${BASE}/boards/${id}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ name, description }),
+    });
+    handleResponse(res);
+    return res.json();
+  },
+
+  async deleteBoard(id: number): Promise<void> {
+    const res = await fetch(`${BASE}/boards/${id}`, { method: 'DELETE', headers: authHeaders() });
+    handleResponse(res);
+  },
+
+  // Columns
+  async getColumns(boardId: number): Promise<Column[]> {
+    const res = await fetch(`${BASE}/boards/${boardId}/columns`, { headers: authHeaders() });
+    handleResponse(res);
+    return res.json();
+  },
+
+  async createColumn(boardId: number, name: string, color: string): Promise<Column> {
+    const res = await fetch(`${BASE}/boards/${boardId}/columns`, {
       method: 'POST',
       headers: authHeaders(),
       body: JSON.stringify({ name, color }),
@@ -36,8 +69,8 @@ export const kanbanApi = {
     return res.json();
   },
 
-  async updateColumn(id: number, name: string, color: string): Promise<Column> {
-    const res = await fetch(`${BASE}/columns/${id}`, {
+  async updateColumn(boardId: number, id: number, name: string, color: string): Promise<Column> {
+    const res = await fetch(`${BASE}/boards/${boardId}/columns/${id}`, {
       method: 'PUT',
       headers: authHeaders(),
       body: JSON.stringify({ name, color }),
@@ -46,11 +79,12 @@ export const kanbanApi = {
     return res.json();
   },
 
-  async deleteColumn(id: number): Promise<void> {
-    const res = await fetch(`${BASE}/columns/${id}`, { method: 'DELETE', headers: authHeaders() });
+  async deleteColumn(boardId: number, id: number): Promise<void> {
+    const res = await fetch(`${BASE}/boards/${boardId}/columns/${id}`, { method: 'DELETE', headers: authHeaders() });
     handleResponse(res);
   },
 
+  // Cards
   async createCard(columnId: number, data: Partial<Card>): Promise<Card> {
     const res = await fetch(`${BASE}/cards/column/${columnId}`, {
       method: 'POST',

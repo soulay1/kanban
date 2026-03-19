@@ -1,10 +1,9 @@
 package com.kanban.kanbanbackend.service;
 
+import com.kanban.kanbanbackend.model.Board;
 import com.kanban.kanbanbackend.model.Column;
-import com.kanban.kanbanbackend.model.User;
+import com.kanban.kanbanbackend.repository.BoardRepository;
 import com.kanban.kanbanbackend.repository.ColumnRepository;
-import com.kanban.kanbanbackend.repository.UserRepository;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,28 +13,30 @@ import java.util.Optional;
 public class ColumnService {
 
     private final ColumnRepository columnRepository;
-    private final UserRepository userRepository;
+    private final BoardRepository boardRepository;
 
-    public ColumnService(ColumnRepository columnRepository, UserRepository userRepository) {
+    public ColumnService(ColumnRepository columnRepository, BoardRepository boardRepository) {
         this.columnRepository = columnRepository;
-        this.userRepository = userRepository;
+        this.boardRepository = boardRepository;
     }
 
-    public List<Column> getAllColumns(String username) {
-        return columnRepository.findByUserUsernameOrderByPositionAsc(username);
+    public List<Column> getAllColumns(Long boardId, String username) {
+        boardRepository.findByIdAndUserUsername(boardId, username)
+                .orElseThrow(() -> new RuntimeException("Board introuvable"));
+        return columnRepository.findByBoardIdOrderByPositionAsc(boardId);
     }
 
-    public Column createColumn(Column column, String username) {
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Utilisateur introuvable"));
-        long count = columnRepository.countByUserUsername(username);
+    public Column createColumn(Long boardId, Column column, String username) {
+        Board board = boardRepository.findByIdAndUserUsername(boardId, username)
+                .orElseThrow(() -> new RuntimeException("Board introuvable"));
+        long count = columnRepository.countByBoardId(boardId);
         column.setPosition((int) count);
-        column.setUser(user);
+        column.setBoard(board);
         return columnRepository.save(column);
     }
 
     public Optional<Column> updateColumn(Long id, Column updated, String username) {
-        return columnRepository.findByIdAndUserUsername(id, username).map(col -> {
+        return columnRepository.findByIdAndBoardUserUsername(id, username).map(col -> {
             col.setName(updated.getName());
             col.setColor(updated.getColor());
             return columnRepository.save(col);
@@ -43,7 +44,7 @@ public class ColumnService {
     }
 
     public boolean deleteColumn(Long id, String username) {
-        return columnRepository.findByIdAndUserUsername(id, username).map(col -> {
+        return columnRepository.findByIdAndBoardUserUsername(id, username).map(col -> {
             columnRepository.delete(col);
             return true;
         }).orElse(false);

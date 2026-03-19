@@ -21,9 +21,9 @@ public class Column {
     private int position;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "board_id", nullable = false)
     @JsonIgnore
-    private User user;
+    private Board board;
 
     @OneToMany(mappedBy = "column", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("position ASC")
@@ -43,8 +43,8 @@ public class Column {
     public int getPosition() { return position; }
     public void setPosition(int position) { this.position = position; }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public Board getBoard() { return board; }
+    public void setBoard(Board board) { this.board = board; }
 
     public List<Card> getCards() { return cards; }
     public void setCards(List<Card> cards) { this.cards = cards; }

@@ -4,13 +4,14 @@ import {
   PointerSensor, useSensor, useSensors, closestCorners,
 } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
-import { Column, Card } from './types/kanban';
+import { Board, Column, Card } from './types/kanban';
 import { kanbanApi } from './api/kanbanApi';
 import { KanbanColumn } from './components/KanbanColumn';
 import { KanbanCard } from './components/KanbanCard';
 import { CardModal } from './components/CardModal';
 import { ColumnModal } from './components/ColumnModal';
 import { AuthPage } from './pages/AuthPage';
+import { BoardsPage } from './pages/BoardsPage';
 import { useAuth } from './context/AuthContext';
 import './App.css';
 
@@ -19,8 +20,9 @@ type ColumnModalState = { column?: Column } | null;
 
 function App() {
   const { token, username, logout } = useAuth();
+  const [selectedBoard, setSelectedBoard] = useState<Board | null>(null);
   const [columns, setColumns] = useState<Column[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeCard, setActiveCard] = useState<Card | null>(null);
   const [cardModal, setCardModal] = useState<CardModalState>(null);
@@ -29,9 +31,10 @@ function App() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const loadColumns = useCallback(async () => {
+    if (!selectedBoard) return;
     try {
       setLoading(true);
-      const data = await kanbanApi.getColumns();
+      const data = await kanbanApi.getColumns(selectedBoard.id);
       setColumns(data);
       setError(null);
     } catch {
@@ -39,11 +42,14 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [selectedBoard]);
 
-  useEffect(() => { if (token) loadColumns(); }, [loadColumns, token]);
+  useEffect(() => {
+    if (token && selectedBoard) loadColumns();
+  }, [loadColumns, token, selectedBoard]);
 
   if (!token) return <AuthPage />;
+  if (!selectedBoard) return <BoardsPage onSelectBoard={setSelectedBoard} />;
 
   const handleDragStart = (event: DragStartEvent) => {
     const { data } = event.active;
@@ -127,7 +133,7 @@ function App() {
     }
 
     if (isOverColumn || isOverCard) {
-      // already handled optimistically
+      // handled optimistically
     }
   };
 
@@ -168,12 +174,13 @@ function App() {
   };
 
   const handleSaveColumn = async (name: string, color: string) => {
+    if (!selectedBoard) return;
     try {
       if (columnModal?.column) {
-        const updated = await kanbanApi.updateColumn(columnModal.column.id, name, color);
+        const updated = await kanbanApi.updateColumn(selectedBoard.id, columnModal.column.id, name, color);
         setColumns((cols) => cols.map((c) => (c.id === updated.id ? { ...c, name: updated.name, color: updated.color } : c)));
       } else {
-        const newCol = await kanbanApi.createColumn(name, color);
+        const newCol = await kanbanApi.createColumn(selectedBoard.id, name, color);
         setColumns((cols) => [...cols, { ...newCol, cards: [] }]);
       }
       setColumnModal(null);
@@ -183,9 +190,10 @@ function App() {
   };
 
   const handleDeleteColumn = async (id: number) => {
+    if (!selectedBoard) return;
     if (!confirm('Supprimer cette colonne et toutes ses cartes ?')) return;
     try {
-      await kanbanApi.deleteColumn(id);
+      await kanbanApi.deleteColumn(selectedBoard.id, id);
       setColumns((cols) => cols.filter((c) => c.id !== id));
     } catch {
       setError('Erreur lors de la suppression.');
@@ -198,11 +206,19 @@ function App() {
         <div className="app__header-left">
           <div className="app__logo">K</div>
           <div>
-            <h1>Kanban Board</h1>
-            <p>{columns.length} colonnes · {columns.reduce((acc, c) => acc + c.cards.length, 0)} cartes</p>
+            <button
+              className="breadcrumb-btn"
+              onClick={() => { setSelectedBoard(null); setColumns([]); }}
+              title="Retour aux boards"
+            >
+              Mes boards
+            </button>
+            <span className="breadcrumb-sep"> / </span>
+            <span className="breadcrumb-current">{selectedBoard.name}</span>
           </div>
         </div>
         <div className="app__header-right">
+          <p className="board-stats">{columns.length} colonne{columns.length !== 1 ? 's' : ''} · {columns.reduce((acc, c) => acc + c.cards.length, 0)} carte{columns.reduce((acc, c) => acc + c.cards.length, 0) !== 1 ? 's' : ''}</p>
           <button className="btn btn--primary" onClick={() => setColumnModal({})}>
             + Nouvelle colonne
           </button>
@@ -239,7 +255,7 @@ function App() {
               {columns.length === 0 ? (
                 <div className="board__empty">
                   <div className="board__empty-icon">📋</div>
-                  <h2>Votre board est vide</h2>
+                  <h2>Ce board est vide</h2>
                   <p>Créez votre première colonne pour commencer</p>
                   <button className="btn btn--primary" onClick={() => setColumnModal({})}>
                     + Créer une colonne

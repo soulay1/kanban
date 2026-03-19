@@ -9,7 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface ColumnRepository extends JpaRepository<Column, Long> {
-    List<Column> findByUserUsernameOrderByPositionAsc(String username);
-    long countByUserUsername(String username);
-    Optional<Column> findByIdAndUserUsername(Long id, String username);
+    List<Column> findByBoardIdOrderByPositionAsc(Long boardId);
+    long countByBoardId(Long boardId);
+    Optional<Column> findByIdAndBoardIdAndBoardUserUsername(Long id, Long boardId, String username);
+    Optional<Column> findByIdAndBoardUserUsername(Long id, String username);
 }

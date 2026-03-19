@@ -21,7 +21,7 @@ public class CardService {
     }
 
     public Optional<Card> createCard(Long columnId, Card card, String username) {
-        return columnRepository.findByIdAndUserUsername(columnId, username).map(column -> {
+        return columnRepository.findByIdAndBoardUserUsername(columnId, username).map(column -> {
             int count = cardRepository.countByColumnId(columnId);
             card.setColumn(column);
             card.setPosition(count);
@@ -31,7 +31,7 @@ public class CardService {
 
     public Optional<Card> updateCard(Long id, Card updated, String username) {
         return cardRepository.findById(id)
-                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .filter(card -> card.getColumn().getBoard().getUser().getUsername().equals(username))
                 .map(card -> {
                     card.setTitle(updated.getTitle());
                     card.setDescription(updated.getDescription());
@@ -43,9 +43,9 @@ public class CardService {
 
     public Optional<Card> moveCard(Long id, MoveCardRequest request, String username) {
         return cardRepository.findById(id)
-                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .filter(card -> card.getColumn().getBoard().getUser().getUsername().equals(username))
                 .map(card -> {
-                    Column targetColumn = columnRepository.findByIdAndUserUsername(request.getTargetColumnId(), username)
+                    Column targetColumn = columnRepository.findByIdAndBoardUserUsername(request.getTargetColumnId(), username)
                             .orElseThrow(() -> new RuntimeException("Colonne introuvable"));
                     card.setColumn(targetColumn);
                     card.setPosition(request.getPosition());
@@ -55,7 +55,7 @@ public class CardService {
 
     public boolean deleteCard(Long id, String username) {
         return cardRepository.findById(id)
-                .filter(card -> card.getColumn().getUser().getUsername().equals(username))
+                .filter(card -> card.getColumn().getBoard().getUser().getUsername().equals(username))
                 .map(card -> { cardRepository.delete(card); return true; })
                 .orElse(false);
     }

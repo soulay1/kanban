@@ -1,5 +1,14 @@
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
+export interface Board {
+  id: number;
+  name: string;
+  description: string;
+  columnCount: number;
+  cardCount: number;
+  createdAt: string;
+}
+
 export interface Card {
   id: number;
   title: string;
