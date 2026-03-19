@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import { LangSwitcher } from '../components/LangSwitcher';
 
-const BASE = 'http://localhost:8080/api/auth';
+const BASE = `${import.meta.env.VITE_API_URL ?? 'http://localhost:8080'}/api/auth`;
 
 export function AuthPage() {
   const { login } = useAuth();
