@@ -1,9 +1,8 @@
 services:
   - type: web
     name: kanban-backend
-    runtime: java
-    buildCommand: cd backend && mvn clean package -DskipTests
-    startCommand: java -jar backend/target/kanban-backend-0.0.1-SNAPSHOT.jar
+    runtime: docker
+    dockerfilePath: backend/Dockerfile
     envVars:
       - key: DATABASE_URL
         sync: false
@@ -11,5 +10,3 @@ services:
         generateValue: true
       - key: FRONTEND_URL
         sync: false
-      - key: JAVA_VERSION
-        value: 21
