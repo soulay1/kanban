@@ -86,7 +86,9 @@ public class SecurityConfig {
                     .filter(s -> !s.isEmpty())
                     .forEach(origins::add);
         }
-        config.setAllowedOrigins(origins.stream().distinct().toList());
+        List<String> patterns = new java.util.ArrayList<>(origins.stream().distinct().toList());
+        patterns.add("https://*.vercel.app");
+        config.setAllowedOriginPatterns(patterns);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
