@@ -72,10 +72,20 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        List<String> origins = Arrays.stream(frontendUrls.split(","))
-                .map(String::trim)
-                .toList();
-        config.setAllowedOrigins(origins);
+        List<String> origins = new java.util.ArrayList<>(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:5174",
+                "http://localhost:5175",
+                "https://kanban-murex-beta.vercel.app"
+        ));
+        // Add any extra origins from FRONTEND_URL env var
+        if (frontendUrls != null && !frontendUrls.isBlank()) {
+            Arrays.stream(frontendUrls.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .forEach(origins::add);
+        }
+        config.setAllowedOrigins(origins.stream().distinct().toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
